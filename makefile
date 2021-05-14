@@ -1,7 +1,7 @@
 build:
 	gcc -Wfatal-errors \
 	-std=c99 \
-	./*.c \
+	./src/*.c \
 	-I"C:\libsdl\include" \
 	-L"C:\libsdl\lib" \
 	-lmingw32 \

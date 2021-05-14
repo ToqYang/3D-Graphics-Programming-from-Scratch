@@ -12,7 +12,7 @@ vec3_t cube_points[N_POINTS];
 vec2_t projected_points[N_POINTS];
 vec3_t camera_position = { .x = 0, .y = 0, .z = -5};
 
-float fov_factor = 680;
+float fov_factor = 800;
 
 bool is_running = false;
 
@@ -93,8 +93,8 @@ void render(void)
 		draw_rect(
 			projected_point.x + (window_width / 2),
 			projected_point.y + (window_height / 2),
-			4,
-			4,
+			5,
+			5,
 			0xFFFFFF00);
 	}
 

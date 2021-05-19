@@ -7,11 +7,15 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+#define FPS 30
+#define FRAME_TARGET_TIME (1000 / FPS)
+
 uint32_t *color_buffer;
 SDL_Texture *color_buffer_texture;
 
 int window_width;
 int window_height;
+
 
 SDL_Window *window;
 SDL_Renderer *renderer;

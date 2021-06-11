@@ -12,7 +12,7 @@ triangle_t* triangles_to_render = NULL;
 
 vec3_t cube_points[N_POINTS];
 vec2_t projected_points[N_POINTS];
-vec3_t camera_position = { .x = 0, .y = 0, .z = -5 };
+vec3_t camera_position = { 0, 0, 0 };
 vec3_t cube_rotation = { .x = 0, .y = 0, .z = 0 };
 
 
@@ -32,7 +32,8 @@ void setup(void)
 	    window_width,
 	    window_height);
 
-	load_cube_mesh_data();
+	//load_cube_mesh_data();
+	load_obj_file_data("./assets/cube.obj");
 }
 
 void process_input(void)
@@ -78,7 +79,7 @@ void update(void)
 
 	mesh.rotation.y += 0.01;
 	mesh.rotation.x += 0.01;
-	mesh.rotation.z += 0.01;
+	mesh.rotation.z += 0.02;
 
 	// Loop all triangle mesh faces
 	int num_faces = array_length(mesh.faces);
@@ -90,7 +91,7 @@ void update(void)
 		face_vertices[1] = mesh.vertices[mesh_face.b - 1];
 		face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-		triangle_t projected_triangle;
+		vec3_t transformed_vertices[3];
 
 		for (int j = 0; j < 3; j++) {
 			vec3_t transformed_vertex = face_vertices[j];
@@ -99,10 +100,43 @@ void update(void)
 			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
 			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
-			transformed_vertex.z -= camera_position.z;
+			transformed_vertex.z += 5;
 
+			transformed_vertices[j] = transformed_vertex;
+		}
+
+		vec3_t vector_a = transformed_vertices[0]; /*   A  */
+		vec3_t vector_b = transformed_vertices[1]; /*  / \  */
+		vec3_t vector_c = transformed_vertices[2]; /* C - B */
+
+		vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+		vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+		vec3_normalize(&vector_ab);
+		vec3_normalize(&vector_ac);
+
+		// Compute face normal using cross product to find perpendicular
+		vec3_t normal = vec3_cross(vector_ab, vector_ac);
+
+		// Normalize face vector
+		vec3_normalize(&normal);
+
+		// Find the vector between a point and the camera origin
+		vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+
+		// Calculate gow aligned the camera ray iw with normal face (using dot product)
+		float dot_normal_camera = vec3_dot(normal, camera_ray);
+
+		// Bypass triangles
+		if (dot_normal_camera < 0) {
+			continue;
+		}
+
+		triangle_t projected_triangle;
+
+		// Loop vertices projection back face
+		for (int j = 0; j < 3; j++) {
 			// Projected the current vertex
-			vec2_t projected_point = project(transformed_vertex);
+			vec2_t projected_point = project(transformed_vertices[j]);
 
 			projected_point.x += (window_width / 2);
 			projected_point.y += (window_height / 2);
@@ -124,9 +158,9 @@ void render(void)
 	for (int i = 0; i < num_triangles; i++) {
 		triangle_t triangle = triangles_to_render[i];
 		// Draw vertex points
-		draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, 0xFFFFFF00);
-		draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, 0xFFFFFF00);
-		draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, 0xFFFFFF00);
+		//draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, 0xFFFFFF00);
+		//draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, 0xFFFFFF00);
+		//draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, 0xFFFFFF00);
 		// Draw unfilled triangle
 		draw_triangle(triangle.points[0].x,
 			      triangle.points[0].y,
